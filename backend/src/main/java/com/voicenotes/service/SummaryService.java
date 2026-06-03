@@ -31,13 +31,21 @@ public class SummaryService {
         t.setStatus(TranscriptionStatus.SUMMARIZING);
         t.setErrorMessage(null);
         repo.save(t);
+        StringBuilder accumulated = new StringBuilder();
         try {
             String prompt = prompts.buildPrompt(t.getTemplate(), t.getTranscriptText());
-            String full = dashScope.streamSummary(prompt, onChunk);
+            String full = dashScope.streamSummary(prompt, chunk -> {
+                accumulated.append(chunk);
+                onChunk.accept(chunk);
+            });
             t.setSummaryMarkdown(full);
             t.setStatus(TranscriptionStatus.DONE);
             repo.save(t);
         } catch (RuntimeException e) {
+            // 中断时保留已生成的部分内容（spec §10），便于从历史重开查看
+            if (accumulated.length() > 0) {
+                t.setSummaryMarkdown(accumulated.toString());
+            }
             t.setStatus(TranscriptionStatus.FAILED);
             t.setErrorMessage(e.getMessage());
             repo.save(t);

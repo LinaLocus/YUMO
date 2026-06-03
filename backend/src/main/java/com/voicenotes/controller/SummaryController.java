@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping("/api/summaries")
@@ -33,7 +32,10 @@ public class SummaryController {
     public SseEmitter stream(@PathVariable Long id) {
         Long uid = currentUser.requireUserId();
         SseEmitter emitter = new SseEmitter(0L); // 不超时
-        Executors.newSingleThreadExecutor().execute(() -> {
+        // 用虚拟线程承载这次 SSE 流式推送：任务是长时间阻塞 I/O（等 Qwen 逐 token 返回），
+        // 虚拟线程在阻塞时自动让出载体线程，开销极低；一次性启动、跑完即终止，无需池化/shutdown，
+        // 从根本上避免每请求新建线程池却不回收导致的线程泄漏。
+        Thread.ofVirtual().name("sse-summary-" + id).start(() -> {
             try {
                 summaryService.streamSummary(uid, id, chunk -> {
                     try {

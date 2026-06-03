@@ -2,6 +2,9 @@ server:
   port: 8080
 
 spring:
+  threads:
+    virtual:
+      enabled: true   # JDK 21 虚拟线程：Tomcat 用虚拟线程处理请求，I/O 密集场景吞吐更好、开销更低
   datasource:
     url: jdbc:mysql://localhost:3306/voicenotes?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
     username: ${DB_USER:root}
