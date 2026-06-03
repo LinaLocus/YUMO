@@ -13,6 +13,7 @@ class TranscriptionFlowTest {
     TranscriptionRepository repo;
     StorageService storage;
     DashScopeService dash;
+    TtsService tts;
     TranscriptionService service;
 
     @BeforeEach
@@ -20,7 +21,8 @@ class TranscriptionFlowTest {
         repo = mock(TranscriptionRepository.class);
         storage = mock(StorageService.class);
         dash = mock(DashScopeService.class);
-        service = new TranscriptionService(repo, storage, dash);
+        tts = mock(TtsService.class);
+        service = new TranscriptionService(repo, storage, dash, tts);
         when(repo.save(any(Transcription.class))).thenAnswer(i -> i.getArgument(0));
     }
 

@@ -16,11 +16,29 @@ public class TranscriptionService {
     private final TranscriptionRepository repo;
     private final StorageService storage;
     private final DashScopeService dashScope;
+    private final TtsService tts;
 
-    public TranscriptionService(TranscriptionRepository repo, StorageService storage, DashScopeService dashScope) {
+    public TranscriptionService(TranscriptionRepository repo, StorageService storage,
+                                DashScopeService dashScope, TtsService tts) {
         this.repo = repo;
         this.storage = storage;
         this.dashScope = dashScope;
+        this.tts = tts;
+    }
+
+    /** 生成（或复用）朗读音频，返回音频文件路径。 */
+    public Transcription generateSpeech(Long userId, Long id) {
+        Transcription t = getOwned(userId, id);
+        if (t.getSummaryMarkdown() == null || t.getSummaryMarkdown().isBlank()) {
+            throw new ApiException(HttpStatus.CONFLICT, "尚无概括内容，无法朗读");
+        }
+        if (t.getTtsAudioPath() != null && new java.io.File(t.getTtsAudioPath()).exists()) {
+            return t; // 复用已生成
+        }
+        byte[] audio = tts.synthesize(t.getSummaryMarkdown());
+        String path = storage.saveTts(t.getId(), audio);
+        t.setTtsAudioPath(path);
+        return repo.save(t);
     }
 
     // 新增：触发转写（同步执行核心逻辑，便于测试）

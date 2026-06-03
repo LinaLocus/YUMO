@@ -5,10 +5,13 @@ import com.voicenotes.domain.Transcription;
 import com.voicenotes.dto.TranscriptionDtos.*;
 import com.voicenotes.security.CurrentUser;
 import com.voicenotes.service.TranscriptionService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -47,6 +50,19 @@ public class TranscriptionController {
         Long uid = currentUser.requireUserId();
         service.runTranscription(uid, id);
         return DetailResponse.from(service.getOwned(uid, id));
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> download(@PathVariable Long id) {
+        Long uid = currentUser.requireUserId();
+        var t = service.getOwned(uid, id);
+        String md = t.getSummaryMarkdown() == null ? "" : t.getSummaryMarkdown();
+        byte[] bytes = md.getBytes(StandardCharsets.UTF_8);
+        String filename = "summary-" + id + ".md";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, "text/markdown; charset=UTF-8")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(bytes);
     }
 
     @DeleteMapping("/{id}")
