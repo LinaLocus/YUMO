@@ -15,10 +15,33 @@ import java.util.List;
 public class TranscriptionService {
     private final TranscriptionRepository repo;
     private final StorageService storage;
+    private final DashScopeService dashScope;
 
-    public TranscriptionService(TranscriptionRepository repo, StorageService storage) {
+    public TranscriptionService(TranscriptionRepository repo, StorageService storage, DashScopeService dashScope) {
         this.repo = repo;
         this.storage = storage;
+        this.dashScope = dashScope;
+    }
+
+    // 新增：触发转写（同步执行核心逻辑，便于测试）
+    public void runTranscription(Long userId, Long id) {
+        Transcription t = getOwned(userId, id);
+        if (t.getStatus() == TranscriptionStatus.TRANSCRIBING) {
+            throw new ApiException(HttpStatus.CONFLICT, "正在转写中");
+        }
+        t.setStatus(TranscriptionStatus.TRANSCRIBING);
+        t.setErrorMessage(null);
+        repo.save(t);
+        try {
+            String text = dashScope.transcribe(t.getAudioPath());
+            t.setTranscriptText(text);
+            t.setStatus(TranscriptionStatus.TRANSCRIBED);
+            repo.save(t);
+        } catch (Exception e) {
+            t.setStatus(TranscriptionStatus.FAILED);
+            t.setErrorMessage(e.getMessage());
+            repo.save(t);
+        }
     }
 
     public Transcription upload(Long userId, MultipartFile file, SummaryTemplate template) {

@@ -42,6 +42,13 @@ public class TranscriptionController {
         return service.list(uid).stream().map(ListItem::from).toList();
     }
 
+    @PostMapping("/{id}/transcribe")
+    public DetailResponse transcribe(@PathVariable Long id) {
+        Long uid = currentUser.requireUserId();
+        service.runTranscription(uid, id);
+        return DetailResponse.from(service.getOwned(uid, id));
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         Long uid = currentUser.requireUserId();
