@@ -33,7 +33,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-dvh flex items-center justify-center p-4">
       <Card className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-1">VoiceNotes</h1>
+        <h1 className="text-2xl font-bold mb-1">语墨 <span className="text-base font-normal opacity-60">EchoInk</span></h1>
         <p className="text-sm opacity-70 mb-6">
           {mode === 'login' ? '登录以继续' : '创建一个新账户'}
         </p>

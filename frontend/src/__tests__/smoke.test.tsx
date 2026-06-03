@@ -3,5 +3,5 @@ import App from '../App';
 
 test('renders app title', () => {
   render(<App />);
-  expect(screen.getByText('VoiceNotes')).toBeInTheDocument();
+  expect(screen.getByText('EchoInk')).toBeInTheDocument();
 });
