@@ -52,4 +52,17 @@ class DashScopeServiceTest {
         assertThat(svc.detectFormat("/x/a.m4a")).isEqualTo("m4a");
         assertThat(svc.detectFormat("/x/a.mp3")).isEqualTo("mp3");
     }
+
+    @Test
+    void extractPlainTextFromSentencesJson() {
+        DashScopeService svc = new DashScopeService(props);
+        String raw = "{\"sentences\":[{\"text\":\"第一句。\"},{\"text\":\"第二句。\"}]}";
+        assertThat(svc.extractPlainText(raw)).isEqualTo("第一句。第二句。");
+    }
+
+    @Test
+    void extractPlainTextPassesThroughPlain() {
+        DashScopeService svc = new DashScopeService(props);
+        assertThat(svc.extractPlainText("已经是纯文本")).isEqualTo("已经是纯文本");
+    }
 }

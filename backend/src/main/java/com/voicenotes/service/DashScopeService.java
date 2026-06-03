@@ -36,18 +36,80 @@ public class DashScopeService {
 
     /** 隔离真实 SDK 调用，测试时可覆盖。 */
     protected String doRecognize(String audioPath) throws Exception {
-        Recognition recognizer = new Recognition();
-        RecognitionParam param = RecognitionParam.builder()
-                .model(props.getDashscope().getAsrModel())
-                .format(detectFormat(audioPath))
-                .sampleRate(16000)
-                .apiKey(props.getDashscope().getApiKey())
-                .build();
-        String result = recognizer.call(param, new File(audioPath));
-        if (result == null || result.isBlank()) {
-            throw new ApiException(HttpStatus.BAD_GATEWAY, "转写返回空结果");
+        // DashScope 实时识别要求 sampleRate 与音频实际一致，且 paraformer 模型偏好 16kHz 单声道。
+        // 用户上传的录音采样率五花八门（44100/48000…），故先用 ffmpeg 统一转码成 16kHz 单声道 wav，
+        // 再喂给识别接口，避免 AUDIO_DECODE_ERROR。转写完删除临时文件。
+        File converted = transcode16kWav(audioPath);
+        try {
+            Recognition recognizer = new Recognition();
+            RecognitionParam param = RecognitionParam.builder()
+                    .model(props.getDashscope().getAsrModel())
+                    .format("wav")
+                    .sampleRate(16000)
+                    .apiKey(props.getDashscope().getApiKey())
+                    .build();
+            String result = recognizer.call(param, converted);
+            if (result == null || result.isBlank()) {
+                throw new ApiException(HttpStatus.BAD_GATEWAY, "转写返回空结果");
+            }
+            return extractPlainText(result);
+        } finally {
+            converted.delete();
         }
-        return result;
+    }
+
+    /**
+     * DashScope 实时识别返回结构化 JSON（含 sentences/words/时间戳），
+     * 这里提取所有 sentence 的 text 拼成纯文本，供概括使用。
+     * 若返回的本就是纯文本（非 JSON），原样返回。
+     */
+    protected String extractPlainText(String raw) {
+        String trimmed = raw.trim();
+        if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+            return trimmed; // 已是纯文本
+        }
+        try {
+            com.fasterxml.jackson.databind.JsonNode root =
+                    new com.fasterxml.jackson.databind.ObjectMapper().readTree(trimmed);
+            com.fasterxml.jackson.databind.JsonNode sentences = root.path("sentences");
+            if (sentences.isArray() && !sentences.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (com.fasterxml.jackson.databind.JsonNode s : sentences) {
+                    String t = s.path("text").asText("");
+                    if (!t.isBlank()) sb.append(t);
+                }
+                if (sb.length() > 0) return sb.toString();
+            }
+            // 兜底：尝试顶层 text 字段
+            String top = root.path("text").asText("");
+            if (!top.isBlank()) return top;
+        } catch (Exception ignored) {
+            // 解析失败则退回原始串
+        }
+        return trimmed;
+    }
+
+    /** 用 ffmpeg 把任意音频转码成 16kHz 单声道 wav，返回临时文件。 */
+    protected File transcode16kWav(String audioPath) throws Exception {
+        File out = File.createTempFile("asr-", ".wav");
+        ProcessBuilder pb = new ProcessBuilder(
+                "ffmpeg", "-y", "-i", audioPath,
+                "-ac", "1", "-ar", "16000", "-f", "wav",
+                out.getAbsolutePath());
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
+        // 读掉输出，避免缓冲区填满阻塞
+        String log;
+        try (var in = p.getInputStream()) {
+            log = new String(in.readAllBytes());
+        }
+        int code = p.waitFor();
+        if (code != 0 || !out.exists() || out.length() == 0) {
+            out.delete();
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "音频转码失败（需安装 ffmpeg）: " + log.lines().reduce((a, b) -> b).orElse(""));
+        }
+        return out;
     }
 
     protected String detectFormat(String path) {

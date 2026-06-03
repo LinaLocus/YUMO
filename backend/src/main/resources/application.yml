@@ -33,6 +33,6 @@ app:
   tts:
     base-url: ${TTS_BASE_URL:}
     api-key: ${TTS_API_KEY:}
-    model: speech-2.8-hd
-    voice: ${TTS_VOICE:alloy}
+    model: ${TTS_MODEL:speech-02-hd}
+    voice: ${TTS_VOICE:male-qn-qingse}
     max-chars: 4000

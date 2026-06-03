@@ -89,12 +89,13 @@ public class TtsService {
 
     /** 隔离真实 HTTP 调用，测试时可覆盖。 */
     protected byte[] requestSpeech(String text) throws Exception {
-        String url = props.getTts().getBaseUrl().replaceAll("/+$", "") + "/audio/speech";
+        // MiniMax 同步语音合成 V2：POST {base}/minimax/v1/t2a_v2
+        // 请求体 {model, text, voice_setting:{voice_id}}；响应 {data:{audio: hex 字符串}}。
+        String url = props.getTts().getBaseUrl().replaceAll("/+$", "") + "/minimax/v1/t2a_v2";
         String json = "{"
                 + "\"model\":\"" + props.getTts().getModel() + "\","
-                + "\"input\":" + jsonString(text) + ","
-                + "\"voice\":\"" + props.getTts().getVoice() + "\","
-                + "\"response_format\":\"mp3\""
+                + "\"text\":" + jsonString(text) + ","
+                + "\"voice_setting\":{\"voice_id\":\"" + props.getTts().getVoice() + "\"}"
                 + "}";
         Request req = new Request.Builder()
                 .url(url)
@@ -103,10 +104,34 @@ public class TtsService {
                 .build();
         try (Response resp = http.newCall(req).execute()) {
             if (!resp.isSuccessful() || resp.body() == null) {
-                throw new ApiException(HttpStatus.BAD_GATEWAY,
-                        "TTS 服务返回 " + resp.code());
+                throw new ApiException(HttpStatus.BAD_GATEWAY, "TTS 服务返回 " + resp.code());
             }
-            return resp.body().bytes();
+            String body = resp.body().string();
+            return parseAudioHex(body);
+        }
+    }
+
+    /** 从 MiniMax 响应 JSON 中取 data.audio 的 hex 字符串并解码为字节。 */
+    protected byte[] parseAudioHex(String responseJson) {
+        try {
+            com.fasterxml.jackson.databind.JsonNode root =
+                    new com.fasterxml.jackson.databind.ObjectMapper().readTree(responseJson);
+            String hex = root.path("data").path("audio").asText("");
+            if (hex.isBlank()) {
+                String errMsg = root.path("base_resp").path("status_msg").asText("");
+                throw new ApiException(HttpStatus.BAD_GATEWAY,
+                        "TTS 返回无音频数据" + (errMsg.isBlank() ? "" : "：" + errMsg));
+            }
+            int len = hex.length();
+            byte[] out = new byte[len / 2];
+            for (int i = 0; i < len; i += 2) {
+                out[i / 2] = (byte) Integer.parseInt(hex.substring(i, i + 2), 16);
+            }
+            return out;
+        } catch (ApiException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ApiException(HttpStatus.BAD_GATEWAY, "解析 TTS 响应失败: " + e.getMessage());
         }
     }
 
