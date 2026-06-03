@@ -27,7 +27,7 @@ describe('streamSummary', () => {
     const chunks: string[] = [];
     const promise = streamSummary(7, 'tok', (c) => chunks.push(c));
 
-    const es = FakeEventSource.instances.at(-1)!;
+    const es = FakeEventSource.instances[FakeEventSource.instances.length - 1];
     expect(es.url).toContain('/api/summaries/7/stream');
     expect(es.url).toContain('token=tok');
 
@@ -43,7 +43,7 @@ describe('streamSummary', () => {
   it('rejects on error event', async () => {
     vi.stubGlobal('EventSource', FakeEventSource as unknown as typeof EventSource);
     const promise = streamSummary(8, 'tok', () => {});
-    const es = FakeEventSource.instances.at(-1)!;
+    const es = FakeEventSource.instances[FakeEventSource.instances.length - 1];
     es.emit('error', '概括失败');
     await expect(promise).rejects.toThrow('概括失败');
   });

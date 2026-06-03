@@ -10,7 +10,7 @@ describe('api', () => {
 
   it('attaches bearer token', async () => {
     auth.set('tok123', 'alice');
-    const spy = vi.spyOn(global, 'fetch').mockResolvedValue(
+    const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify([]), {
         status: 200,
         headers: { 'content-type': 'application/json' },
@@ -24,13 +24,13 @@ describe('api', () => {
 
   it('clears auth and throws on 401', async () => {
     auth.set('tok', 'alice');
-    vi.spyOn(global, 'fetch').mockResolvedValue(new Response('', { status: 401 }));
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('', { status: 401 }));
     await expect(api.list()).rejects.toThrow('登录已过期');
     expect(auth.isLoggedIn()).toBe(false);
   });
 
   it('surfaces server error message', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValue(
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ error: '用户名已存在' }), {
         status: 409,
         headers: { 'content-type': 'application/json' },
