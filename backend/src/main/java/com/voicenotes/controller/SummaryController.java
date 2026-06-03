@@ -57,9 +57,10 @@ public class SummaryController {
     }
 
     @PostMapping("/{id}/speech")
-    public SpeechResponse generateSpeech(@PathVariable Long id) {
+    public SpeechResponse generateSpeech(@PathVariable Long id,
+                                         @RequestParam(value = "voice", required = false) String voice) {
         Long uid = currentUser.requireUserId();
-        transcriptionService.generateSpeech(uid, id);
+        transcriptionService.generateSpeech(uid, id, voice);
         return new SpeechResponse(id, "/api/summaries/" + id + "/speech");
     }
 

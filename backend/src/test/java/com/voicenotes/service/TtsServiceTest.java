@@ -48,23 +48,40 @@ class TtsServiceTest {
     @Test
     void synthesizeConcatenatesSegmentBytes() {
         List<String> calls = new ArrayList<>();
+        List<String> voices = new ArrayList<>();
         TtsService svc = new TtsService(props) {
-            @Override protected byte[] requestSpeech(String text) {
+            @Override protected byte[] requestSpeech(String text, String voiceId) {
                 calls.add(text);
+                voices.add(voiceId);
                 return text.getBytes();
             }
         };
         props.getTts().setMaxChars(5);
-        byte[] out = svc.synthesize("一二三四五六七"); // 7 chars -> 2 段
+        props.getTts().setVoice("default-voice");
+        byte[] out = svc.synthesize("一二三四五六七", null); // voice 为空 -> 用默认
         assertThat(calls).hasSize(2);
+        assertThat(voices).containsOnly("default-voice");
         assertThat(new String(out)).isEqualTo("一二三四五六七");
+    }
+
+    @Test
+    void synthesizeUsesProvidedVoice() {
+        List<String> voices = new ArrayList<>();
+        TtsService svc = new TtsService(props) {
+            @Override protected byte[] requestSpeech(String text, String voiceId) {
+                voices.add(voiceId);
+                return text.getBytes();
+            }
+        };
+        svc.synthesize("文本", "female-yujie");
+        assertThat(voices).containsOnly("female-yujie");
     }
 
     @Test
     void missingConfigThrows() {
         props.getTts().setApiKey("");
         TtsService svc = new TtsService(props);
-        assertThatThrownBy(() -> svc.synthesize("文本"))
+        assertThatThrownBy(() -> svc.synthesize("文本", null))
                 .isInstanceOf(ApiException.class);
     }
 }

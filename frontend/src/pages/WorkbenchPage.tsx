@@ -29,6 +29,7 @@ export default function WorkbenchPage() {
   const [streaming, setStreaming] = useState(false);
   const [showAudio, setShowAudio] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [speechVersion, setSpeechVersion] = useState(0);
   const [detail, setDetail] = useState<Detail | null>(null);
 
   const refreshList = useCallback(async () => {
@@ -114,6 +115,7 @@ export default function WorkbenchPage() {
 
   async function speakReady() {
     setSpeaking(false);
+    setSpeechVersion((v) => v + 1);
     setShowAudio(true);
   }
 
@@ -167,7 +169,7 @@ export default function WorkbenchPage() {
                         {activeId && <Button onClick={() => runSummary(activeId)}>生成概括</Button>}
                       </div>
                     )}
-                  {showAudio && activeId && <AudioPlayer id={activeId} />}
+                  {showAudio && activeId && <AudioPlayer id={activeId} version={speechVersion} />}
                   {detail?.status === 'FAILED' && detail.errorMessage && (
                     <p className="mt-3 text-sm text-destructive" role="alert">{detail.errorMessage}</p>
                   )}

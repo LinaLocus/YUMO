@@ -26,16 +26,17 @@ public class TranscriptionService {
         this.tts = tts;
     }
 
-    /** 生成（或复用）朗读音频，返回音频文件路径。 */
-    public Transcription generateSpeech(Long userId, Long id) {
+    /** 按所选音色生成朗读音频（每次重新生成），返回更新后的记录。voice 为空则用默认音色。 */
+    public Transcription generateSpeech(Long userId, Long id, String voice) {
         Transcription t = getOwned(userId, id);
         if (t.getSummaryMarkdown() == null || t.getSummaryMarkdown().isBlank()) {
             throw new ApiException(HttpStatus.CONFLICT, "尚无概括内容，无法朗读");
         }
-        if (t.getTtsAudioPath() != null && new java.io.File(t.getTtsAudioPath()).exists()) {
-            return t; // 复用已生成
+        // 删除旧音频，避免换音色后仍播放旧文件
+        if (t.getTtsAudioPath() != null) {
+            storage.delete(t.getTtsAudioPath());
         }
-        byte[] audio = tts.synthesize(t.getSummaryMarkdown());
+        byte[] audio = tts.synthesize(t.getSummaryMarkdown(), voice);
         String path = storage.saveTts(t.getId(), audio);
         t.setTtsAudioPath(path);
         return repo.save(t);

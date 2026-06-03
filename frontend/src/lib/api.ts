@@ -60,10 +60,11 @@ export const api = {
   list: () => request<ListItem[]>('/api/transcriptions'),
   remove: (id: number) =>
     request<void>(`/api/transcriptions/${id}`, { method: 'DELETE' }),
-  generateSpeech: (id: number) =>
-    request<{ id: number; audioUrl: string }>(`/api/summaries/${id}/speech`, {
-      method: 'POST',
-    }),
+  generateSpeech: (id: number, voice?: string) =>
+    request<{ id: number; audioUrl: string }>(
+      `/api/summaries/${id}/speech${voice ? `?voice=${encodeURIComponent(voice)}` : ''}`,
+      { method: 'POST' },
+    ),
   downloadUrl: (id: number) => `/api/transcriptions/${id}/download`,
   speechUrl: (id: number) => `/api/summaries/${id}/speech`,
 };

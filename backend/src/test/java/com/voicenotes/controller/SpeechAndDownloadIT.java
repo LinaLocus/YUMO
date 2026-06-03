@@ -55,7 +55,7 @@ class SpeechAndDownloadIT {
 
     @Test
     void generateSpeechThenDownloadMd() throws Exception {
-        when(ttsService.synthesize(anyString())).thenReturn(new byte[]{1, 2, 3});
+        when(ttsService.synthesize(anyString(), org.mockito.ArgumentMatchers.any())).thenReturn(new byte[]{1, 2, 3});
         String tk = token("ttsUser");
         Long id = seedDone(tk);
 

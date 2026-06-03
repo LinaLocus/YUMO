@@ -66,9 +66,10 @@ public class TtsService {
         return parts;
     }
 
-    /** 合成整段音频字节。 */
-    public byte[] synthesize(String markdown) {
+    /** 合成整段音频字节。voice 为空则用配置默认音色。 */
+    public byte[] synthesize(String markdown, String voice) {
         requireConfig();
+        String voiceId = (voice == null || voice.isBlank()) ? props.getTts().getVoice() : voice;
         String plain = toPlainText(markdown);
         if (plain.isBlank()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "无可朗读内容");
@@ -77,7 +78,7 @@ public class TtsService {
         try {
             for (String seg : splitText(plain)) {
                 if (seg.isBlank()) continue;
-                out.write(requestSpeech(seg));
+                out.write(requestSpeech(seg, voiceId));
             }
         } catch (ApiException e) {
             throw e;
@@ -88,14 +89,14 @@ public class TtsService {
     }
 
     /** 隔离真实 HTTP 调用，测试时可覆盖。 */
-    protected byte[] requestSpeech(String text) throws Exception {
+    protected byte[] requestSpeech(String text, String voiceId) throws Exception {
         // MiniMax 同步语音合成 V2：POST {base}/minimax/v1/t2a_v2
         // 请求体 {model, text, voice_setting:{voice_id}}；响应 {data:{audio: hex 字符串}}。
         String url = props.getTts().getBaseUrl().replaceAll("/+$", "") + "/minimax/v1/t2a_v2";
         String json = "{"
                 + "\"model\":\"" + props.getTts().getModel() + "\","
                 + "\"text\":" + jsonString(text) + ","
-                + "\"voice_setting\":{\"voice_id\":\"" + props.getTts().getVoice() + "\"}"
+                + "\"voice_setting\":{\"voice_id\":\"" + voiceId + "\"}"
                 + "}";
         Request req = new Request.Builder()
                 .url(url)
