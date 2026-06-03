@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/voicenotes?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 210MB
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-dev-secret-to-a-long-random-string-min-32-bytes}
+    expiration-ms: 86400000
+  storage:
+    audio-dir: ${AUDIO_DIR:./data/audio}
+    tts-dir: ${TTS_DIR:./data/tts}
+  dashscope:
+    api-key: ${DASHSCOPE_API_KEY:}
+    asr-model: paraformer-realtime-v2
+    llm-model: qwen-plus
+  tts:
+    base-url: ${TTS_BASE_URL:}
+    api-key: ${TTS_API_KEY:}
+    model: speech-2.8-hd
+    voice: ${TTS_VOICE:alloy}
+    max-chars: 4000
