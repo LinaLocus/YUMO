@@ -4,3 +4,24 @@
 
 body { @apply bg-background text-foreground font-sans antialiased; }
 .dark body { @apply bg-[#0b1f1d] text-[#d6f5ef]; }
+
+/* Markdown 结果区排版 */
+.prose-like h1 { @apply text-2xl font-bold mt-2 mb-3; }
+.prose-like h2 { @apply text-xl font-semibold mt-5 mb-2; }
+.prose-like h3 { @apply text-lg font-semibold mt-4 mb-2; }
+.prose-like p { @apply my-2; }
+.prose-like ul { @apply list-disc pl-6 my-2 space-y-1; }
+.prose-like ol { @apply list-decimal pl-6 my-2 space-y-1; }
+.prose-like code { @apply rounded bg-muted px-1 py-0.5 font-mono text-sm; }
+.prose-like pre { @apply rounded-lg bg-muted p-3 overflow-x-auto my-3; }
+.prose-like strong { @apply font-semibold; }
+.prose-like blockquote { @apply border-l-4 border-primary/40 pl-3 italic opacity-80; }
+
+/* 尊重系统减少动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
