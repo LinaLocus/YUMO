@@ -8,6 +8,9 @@ backend/data/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+frontend/tsconfig.tsbuildinfo
+# 误生成的 TS 编译产物（源码是 .ts/.tsx，由 Vite 处理，不应出现 .js）
+frontend/src/**/*.js
 
 # Secrets & local config
 .env
