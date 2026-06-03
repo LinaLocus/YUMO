@@ -38,13 +38,30 @@ public class TtsService {
                 .trim();
     }
 
-    /** 按 maxChars 切分（尽量在换行/句号处断，简单实现按长度切）。 */
+    /**
+     * 按 maxChars 切分，优先在句末标点（。！？!?；;）或换行处断句，
+     * 避免把一句话从中间切开导致朗读不自然。单句若本身超过 maxChars 才硬切。
+     */
     public List<String> splitText(String text) {
         int max = props.getTts().getMaxChars();
         List<String> parts = new ArrayList<>();
-        for (int i = 0; i < text.length(); i += max) {
-            parts.add(text.substring(i, Math.min(text.length(), i + max)));
+        StringBuilder cur = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            cur.append(c);
+            boolean isBreak = c == '。' || c == '！' || c == '？' || c == '!' || c == '?'
+                    || c == '；' || c == ';' || c == '\n';
+            if (cur.length() >= max) {
+                // 已达上限：在标点处断，否则硬切
+                parts.add(cur.toString());
+                cur.setLength(0);
+            } else if (isBreak && cur.length() >= max / 2) {
+                // 到达句末且已有一定长度，自然断句
+                parts.add(cur.toString());
+                cur.setLength(0);
+            }
         }
+        if (cur.length() > 0) parts.add(cur.toString());
         if (parts.isEmpty()) parts.add("");
         return parts;
     }

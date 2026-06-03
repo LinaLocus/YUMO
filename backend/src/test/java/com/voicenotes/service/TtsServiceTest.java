@@ -36,6 +36,16 @@ class TtsServiceTest {
     }
 
     @Test
+    void splitsAtSentenceBoundary() {
+        props.getTts().setMaxChars(10);
+        TtsService svc = new TtsService(props);
+        // 第一句 6 字 + 句号在 max/2 之后，应在句号处自然断开
+        List<String> parts = svc.splitText("第一句话内容。第二句话内容。");
+        assertThat(parts.get(0)).endsWith("。");
+        assertThat(parts.get(0)).isEqualTo("第一句话内容。");
+    }
+
+    @Test
     void synthesizeConcatenatesSegmentBytes() {
         List<String> calls = new ArrayList<>();
         TtsService svc = new TtsService(props) {
