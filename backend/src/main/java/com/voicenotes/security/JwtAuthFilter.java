@@ -24,6 +24,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        // SSE 异步重派发时仍需重新认证（从 ?token= 读取），否则授权链视为匿名而拒绝
+        return false;
+    }
+
+    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest req,
                                     @NonNull HttpServletResponse res,
                                     @NonNull FilterChain chain) throws ServletException, IOException {
