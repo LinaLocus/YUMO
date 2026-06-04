@@ -122,7 +122,10 @@ export default function WorkbenchPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="flex items-center justify-between border-b border-[#99F6E4]/40 px-4 py-3">
-        <span className="text-lg font-bold">语墨 <span className="text-sm font-normal opacity-60">EchoInk</span></span>
+        <div className="flex items-baseline gap-3">
+          <span className="text-lg font-bold">语墨 <span className="text-sm font-normal opacity-60">EchoInk</span></span>
+          <span className="hidden sm:inline text-xs italic opacity-50">“声驻韶华化作墨，字留方寸赋新篇”</span>
+        </div>
         <div className="flex items-center gap-2">
           <TemplateSelect value={template} onChange={setTemplate} disabled={view === 'transcribing' || streaming} />
           <ThemeToggle />
