@@ -1,5 +1,6 @@
 package com.voicenotes.service;
 
+import com.voicenotes.domain.SummaryLanguage;
 import com.voicenotes.domain.SummaryTemplate;
 import com.voicenotes.domain.Transcription;
 import com.voicenotes.domain.TranscriptionStatus;
@@ -63,13 +64,14 @@ public class TranscriptionService {
         }
     }
 
-    public Transcription upload(Long userId, MultipartFile file, SummaryTemplate template) {
+    public Transcription upload(Long userId, MultipartFile file, SummaryTemplate template, SummaryLanguage language) {
         String path = storage.saveAudio(file);
         Transcription t = new Transcription();
         t.setUserId(userId);
         t.setOriginalFilename(file.getOriginalFilename());
         t.setAudioPath(path);
         t.setTemplate(template == null ? SummaryTemplate.GENERAL : template);
+        t.setLanguage(language == null ? SummaryLanguage.AUTO : language);
         t.setStatus(TranscriptionStatus.UPLOADED);
         return repo.save(t);
     }

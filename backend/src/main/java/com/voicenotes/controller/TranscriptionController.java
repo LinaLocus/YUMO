@@ -27,9 +27,10 @@ public class TranscriptionController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UploadResponse upload(@RequestParam("file") MultipartFile file,
-                                 @RequestParam(value = "template", required = false) SummaryTemplate template) {
+                                 @RequestParam(value = "template", required = false) SummaryTemplate template,
+                                 @RequestParam(value = "language", required = false) com.voicenotes.domain.SummaryLanguage language) {
         Long uid = currentUser.requireUserId();
-        Transcription t = service.upload(uid, file, template);
+        Transcription t = service.upload(uid, file, template, language);
         return new UploadResponse(t.getId(), t.getStatus());
     }
 

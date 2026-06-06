@@ -1,12 +1,13 @@
 package com.voicenotes.service;
 
+import com.voicenotes.domain.SummaryLanguage;
 import com.voicenotes.domain.SummaryTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PromptTemplateService {
 
-    public String buildPrompt(SummaryTemplate template, String transcript) {
+    public String buildPrompt(SummaryTemplate template, SummaryLanguage language, String transcript) {
         String instruction = switch (template) {
             case MEETING -> """
                 你是会议纪要助手。请根据下面的会议转写文字，输出一份结构化的 Markdown 会议纪要，包含：
@@ -32,6 +33,16 @@ public class PromptTemplateService {
                 ## 关键词
                 只输出 Markdown，不要额外说明。""";
         };
-        return instruction + "\n\n---\n转写文字：\n" + transcript;
+        return instruction + languageDirective(language) + "\n\n---\n转写文字：\n" + transcript;
+    }
+
+    /** 根据所选语言追加输出语言指令；AUTO 跟随转写原文语言。 */
+    private String languageDirective(SummaryLanguage language) {
+        SummaryLanguage lang = language == null ? SummaryLanguage.AUTO : language;
+        return switch (lang) {
+            case CHINESE -> "\n请用简体中文输出概括内容（标题与正文均使用中文）。";
+            case ENGLISH -> "\nOutput the entire summary in English, including all headings and body text.";
+            case AUTO -> "\n请使用与转写文字相同的语言输出概括（转写是中文则用中文，是英文则用英文）。";
+        };
     }
 }

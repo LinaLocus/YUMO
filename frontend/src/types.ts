@@ -4,6 +4,8 @@ export type TranscriptionStatus =
 
 export type SummaryTemplate = 'MEETING' | 'LECTURE' | 'GENERAL';
 
+export type SummaryLanguage = 'AUTO' | 'CHINESE' | 'ENGLISH';
+
 export interface Detail {
   id: number;
   originalFilename: string;

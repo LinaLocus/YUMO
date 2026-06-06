@@ -33,7 +33,7 @@ public class SummaryService {
         repo.save(t);
         StringBuilder accumulated = new StringBuilder();
         try {
-            String prompt = prompts.buildPrompt(t.getTemplate(), t.getTranscriptText());
+            String prompt = prompts.buildPrompt(t.getTemplate(), t.getLanguage(), t.getTranscriptText());
             String full = dashScope.streamSummary(prompt, chunk -> {
                 accumulated.append(chunk);
                 onChunk.accept(chunk);

@@ -5,13 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { streamSummary } from '@/lib/sse';
 import { auth } from '@/store/auth';
-import type { Detail, ListItem, SummaryTemplate } from '@/types';
+import type { Detail, ListItem, SummaryTemplate, SummaryLanguage } from '@/types';
 import { Dropzone } from '@/components/Dropzone';
 import { TranscribeProgress } from '@/components/TranscribeProgress';
 import { SummaryView } from '@/components/SummaryView';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { Toolbar } from '@/components/Toolbar';
 import { TemplateSelect } from '@/components/TemplateSelect';
+import { LanguageSelect } from '@/components/LanguageSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HistorySidebar } from '@/components/HistorySidebar';
 import { Card } from '@/components/ui/card';
@@ -24,6 +25,7 @@ export default function WorkbenchPage() {
   const [items, setItems] = useState<ListItem[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [template, setTemplate] = useState<SummaryTemplate>('MEETING');
+  const [language, setLanguage] = useState<SummaryLanguage>('AUTO');
   const [view, setView] = useState<View>('idle');
   const [markdown, setMarkdown] = useState('');
   const [streaming, setStreaming] = useState(false);
@@ -49,7 +51,7 @@ export default function WorkbenchPage() {
   async function handleFile(file: File) {
     try {
       setView('transcribing');
-      const up = await api.upload(file, template);
+      const up = await api.upload(file, template, language);
       setActiveId(up.id);
       await refreshList();
 
@@ -128,6 +130,7 @@ export default function WorkbenchPage() {
         </div>
         <div className="flex items-center gap-2">
           <TemplateSelect value={template} onChange={setTemplate} disabled={view === 'transcribing' || streaming} />
+          <LanguageSelect value={language} onChange={setLanguage} disabled={view === 'transcribing' || streaming} />
           <ThemeToggle />
           <Button variant="ghost" onClick={logout}>退出</Button>
         </div>

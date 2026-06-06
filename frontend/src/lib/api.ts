@@ -1,5 +1,5 @@
 import { auth } from '@/store/auth';
-import type { AuthResponse, Detail, ListItem, SummaryTemplate } from '@/types';
+import type { AuthResponse, Detail, ListItem, SummaryTemplate, SummaryLanguage } from '@/types';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -45,10 +45,11 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     }),
-  upload: (file: File, template: SummaryTemplate) => {
+  upload: (file: File, template: SummaryTemplate, language: SummaryLanguage) => {
     const fd = new FormData();
     fd.append('file', file);
     fd.append('template', template);
+    fd.append('language', language);
     return request<{ id: number; status: string }>('/api/transcriptions', {
       method: 'POST',
       body: fd,

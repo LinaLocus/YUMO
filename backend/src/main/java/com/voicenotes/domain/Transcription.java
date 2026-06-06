@@ -37,6 +37,10 @@ public class Transcription {
     @Column(nullable = false)
     private SummaryTemplate template = SummaryTemplate.GENERAL;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SummaryLanguage language = SummaryLanguage.AUTO;
+
     @Column(length = 1000)
     private String errorMessage;
 
@@ -66,6 +70,8 @@ public class Transcription {
     public void setTtsAudioPath(String v) { this.ttsAudioPath = v; }
     public SummaryTemplate getTemplate() { return template; }
     public void setTemplate(SummaryTemplate v) { this.template = v; }
+    public SummaryLanguage getLanguage() { return language; }
+    public void setLanguage(SummaryLanguage v) { this.language = v; }
     public String getErrorMessage() { return errorMessage; }
     public void setErrorMessage(String v) { this.errorMessage = v; }
     public Instant getCreatedAt() { return createdAt; }
