@@ -6,7 +6,7 @@
 
 **Architecture:** 后端 Spring Boot（Spring MVC 分层 Controller→Service→Repository）+ MySQL（JPA）+ Spring Security/JWT。AI 能力：DashScope 实时识别 SDK 喂本地音频文件做转写（ASR），Qwen 流式接口做概括（经 `SseEmitter` 推送），speech-2.8-hd（OpenAI 兼容 TTS，经中转站）做朗读。前端 React + Vite + Tailwind + shadcn/ui + Framer Motion，通过 fetch/SSE/EventSource 与后端通信。
 
-**Tech Stack:** Java 17, Spring Boot 3.x, Gradle, MySQL 8, Spring Data JPA, Spring Security, jjwt, dashscope-sdk-java, OkHttp（TTS HTTP）, JUnit 5 + Mockito + H2（测试）; React 18, Vite, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion, react-markdown, Vitest + React Testing Library。
+**Tech Stack:** Java 21, Spring Boot 3.x, Gradle, MySQL 8, Spring Data JPA, Spring Security, jjwt, dashscope-sdk-java, OkHttp（TTS HTTP）, JUnit 5 + Mockito + H2（测试）; React 18, Vite, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion, react-markdown, Vitest + React Testing Library。
 
 ---
 
@@ -110,7 +110,7 @@ frontend/
 
 每个 Task 末尾都 commit。后端用 `./gradlew test` 跑测试，前端用 `npm run test`。
 
-> **环境前置**：本地需装 JDK 17、Node 18+、MySQL 8（或开发期用 H2）。运行后端前设环境变量 `DASHSCOPE_API_KEY`、`TTS_BASE_URL`、`TTS_API_KEY`、`JWT_SECRET`、`DB_USER`、`DB_PASSWORD`。密钥绝不写进代码或提交到 git。
+> **环境前置**：本地需装 JDK 21、Node 18+、MySQL 8（或开发期用 H2）。运行后端前设环境变量 `DASHSCOPE_API_KEY`、`TTS_BASE_URL`、`TTS_API_KEY`、`JWT_SECRET`、`DB_USER`、`DB_PASSWORD`。密钥绝不写进代码或提交到 git。
 
 ---
 
