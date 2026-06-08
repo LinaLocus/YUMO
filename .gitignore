@@ -22,3 +22,9 @@ frontend/src/**/*.js
 .idea/
 *.iml
 .vscode/
+.cursor/
+
+# 工具 / 临时产物
+.codegraph/
+outputs/
+frontend/outputs/
