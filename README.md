@@ -23,7 +23,7 @@
 
 | 层 | 技术 |
 |---|---|
-| 后端 | Java 17、Spring Boot 3.3（Spring MVC）、Gradle |
+| 后端 | Java 21、Spring Boot 3.3（Spring MVC）、Gradle |
 | 持久化 | Spring Data JPA、MySQL 8 |
 | 鉴权 | Spring Security + JWT（jjwt） |
 | 语音/大模型 | DashScope SDK（Paraformer 实时识别 + Qwen 流式） |
@@ -59,7 +59,7 @@
 
 ## 环境要求
 
-- JDK 17+（开发环境用的是 JDK 21，可用虚拟线程）
+- JDK 21（使用虚拟线程，需 21+）
 - Node 18+
 - MySQL 8（库 `voicenotes` 会自动创建）
 - **ffmpeg**（音频转码必需，需在 PATH 中）
