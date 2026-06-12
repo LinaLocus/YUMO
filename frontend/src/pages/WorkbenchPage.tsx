@@ -15,6 +15,7 @@ import { TemplateSelect } from '@/components/TemplateSelect';
 import { LanguageSelect } from '@/components/LanguageSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HistorySidebar } from '@/components/HistorySidebar';
+import TextType from '@/components/TextType';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -126,7 +127,17 @@ export default function WorkbenchPage() {
       <header className="flex items-center justify-between border-b border-[#99F6E4]/40 px-4 py-3">
         <div className="flex items-baseline gap-3">
           <span className="text-lg font-bold">语墨 <span className="text-sm font-normal opacity-60">EchoInk</span></span>
-          <span className="hidden sm:inline text-xs italic opacity-50">“声驻韶华化作墨，字留方寸赋新篇”</span>
+          <TextType
+            as="span"
+            className="hidden sm:inline text-xs italic opacity-50"
+            text={['“声驻韶华化作墨，字留方寸赋新篇”']}
+            typingSpeed={120}
+            pauseDuration={3000}
+            initialDelay={400}
+            showCursor={true}
+            cursorCharacter="▌"
+            cursorClassName="text-xs opacity-50"
+          />
         </div>
         <div className="flex items-center gap-2">
           <TemplateSelect value={template} onChange={setTemplate} disabled={view === 'transcribing' || streaming} />
